@@ -78,3 +78,53 @@ NUM_WORKERS = 0
  
 
 # If you see MPS errors on Apple M (e.g. "not implemented"), force CPU: device = torch.device("cpu")
+# kernel/filter : a small matrix (eg. 3*3) of numbers .The CNN learns thse number during training and each kernel dte
+
+
+# Step 1: Define the convolution function (we'll use it in the examples below)
+
+def conv2d_numpy(X, K):
+
+    """Manual 2D convolution — no padding, stride 1.
+
+    X: (H, W) input, K: (kH, kW) kernel. Output: (H - kH + 1, W - kW + 1).
+
+    At each position we multiply the patch with the kernel and sum."""
+
+    H, W = X.shape
+
+    kH, kW = K.shape
+
+    out_h = H - kH + 1
+
+    out_w = W - kW + 1
+
+    Y = np.zeros((out_h, out_w))
+
+    for i in range(out_h):
+
+        for j in range(out_w):
+
+            patch = X[i:i+kH, j:j+kW]
+
+            Y[i, j] = np.sum(patch * K)
+
+    return Y
+
+ 
+
+# Step 2: Convolution by hand — 4×4 input, 2×2 kernel → 3×3 output
+
+X_small = np.array([[1., 0., 1., 0.], [0., 1., 1., 0.], [1., 1., 0., 1.], [0., 0., 1., 1.]])
+
+K_small = np.array([[1., -1.], [0., 1.]])
+
+Y_small = conv2d_numpy(X_small, K_small)
+
+print("Input (4×4):\n", X_small)
+
+print("Kernel (2×2):\n", K_small)
+
+print("Output (3×3):\n", Y_small)
+
+print("Top-left output = sum of X[0:2,0:2]*K =", np.sum(X_small[0:2, 0:2] * K_small))
