@@ -128,3 +128,24 @@ print("Kernel (2×2):\n", K_small)
 print("Output (3×3):\n", Y_small)
 
 print("Top-left output = sum of X[0:2,0:2]*K =", np.sum(X_small[0:2, 0:2] * K_small))
+
+# practical example :edge detector on random 8*8 image  
+# the shobel - like kernel  detects vertical edges 
+
+# Practical example: Edge detector on random 8×8 image
+
+# The Sobel-like kernel [[-1,0,1],[-2,0,2],[-1,0,1]] detects vertical edges
+
+np.random.seed(42)
+
+img = np.random.randn(8, 8)
+
+kernel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])  # vertical edge
+
+out = conv2d_numpy(img, kernel)
+
+print("Input shape:", img.shape)
+
+print("Kernel shape:", kernel.shape)
+
+print("Output shape:", out.shape)
