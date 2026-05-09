@@ -149,3 +149,100 @@ print("Input shape:", img.shape)
 print("Kernel shape:", kernel.shape)
 
 print("Output shape:", out.shape)
+
+
+# PyTorch Conv2d on a sample image (single channel)
+
+conv = nn.Conv2d(1, 4, kernel_size=3, stride=1, padding=0)
+
+x = torch.randn(1, 1, 28, 28)  # (batch, channels, H, W)
+
+y = conv(x)
+
+print("Input:", x.shape)
+
+print("Conv2d(1, 4, k=3):", y.shape)
+
+print("Parameters:", sum(p.numel() for p in conv.parameters()))
+
+# learning about the pooling layers 
+
+x = torch.randn(1, 4, 26, 26)
+
+mp = nn.MaxPool2d(2, stride=2)
+
+ap = nn.AvgPool2d(2, stride=2)
+
+print("Input:", x.shape)
+
+print("After MaxPool2d(2):", mp(x).shape   )
+
+print("After AvgPool2d(2):", ap(x).shape)
+
+
+# full cnn stack :conv-> pool -> fc-> o/p
+
+class TinyCNN(nn.Module):
+
+    """A small CNN for MNIST (28×28 grayscale). Structure: Conv → Pool → Conv → Pool → FC → Output."""
+
+    def __init__(self, num_classes=10):
+
+        super().__init__()
+
+        self.conv1 = nn.Conv2d(1, 16, 3, padding=1)   # 1 channel in, 16 filters out; padding=1 keeps size
+
+        self.pool = nn.MaxPool2d(2, 2)                # 2×2 windows, stride 2 → halves each dimension
+
+        self.conv2 = nn.Conv2d(16, 32, 3, padding=1)  # 16 channels in, 32 out
+
+        self.fc1 = nn.Linear(32 * 7 * 7, 128)        # After 2 pools: 28→14→7, so 7×7 spatial, 128 nodes (Hidden Layer / fc1)
+
+        self.fc2 = nn.Linear(128, num_classes)
+
+ 
+
+    def forward(self, x):
+
+        x = self.pool(F.relu(self.conv1(x)))   # (B,16,14,14)
+
+        x = self.pool(F.relu(self.conv2(x)))   # (B,32,7,7)
+
+        x = x.view(x.size(0), -1)   # Flatten: (B, 32*7*7)
+
+        x = F.relu(self.fc1(x))
+
+        x = self.fc2(x)
+
+        return x
+
+model = TinyCNN(10)
+
+print(model)
+
+print("Total params:", sum(p.numel() for p in model.parameters()))
+
+
+# Manual 1D convolution (NumPy)
+
+def conv1d_numpy(x, w):
+
+    """x: (L,), w: (k,). Output length L - k + 1."""
+
+    L, k = len(x), len(w)
+
+    out = np.zeros(L - k + 1)
+
+    for i in range(len(out)):
+
+        out[i] = np.sum(x[i:i+k] * w)
+
+    return out
+
+ 
+
+x = np.array([1., 2., 3., 4., 5., 6., 7.])
+
+w = np.array([0.5, -0.5])
+
+print("1D conv output:", conv1d_numpy(x, w))
