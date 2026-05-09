@@ -271,3 +271,74 @@ train_loader = DataLoader(train_set, batch_size=64, shuffle=True, num_workers=NU
 test_loader = DataLoader(test_set, batch_size=256, shuffle=False, num_workers=NUM_WORKERS)
 
 print("MNIST train:", len(train_set), "test:", len(test_set))
+
+def train_epoch(model, loader, criterion, optimizer, device):
+
+    """One training epoch: loop over batches, forward, loss, backward, update weights."""
+
+    model.train()
+
+    total_loss, correct, n = 0, 0, 0
+
+    for X, y in loader:
+
+        X, y = X.to(device), y.to(device)  # Move to GPU/MPS/CPU
+
+        optimizer.zero_grad()
+
+        out = model(X)
+
+        loss = criterion(out, y)
+
+        loss.backward()
+
+        optimizer.step()
+
+        total_loss+= loss.item()
+
+        n += len(y)
+
+        correct += (out.argmax(1) == y).sum().item()
+
+    return total_loss / len(loader), correct / n
+
+ 
+
+def eval_model(model, loader, device):
+
+    """Evaluate: no gradients, count correct predictions."""
+
+    model.eval()
+
+    correct, n = 0, 0
+
+    with torch.no_grad():
+
+        for X, y in loader:
+
+            X, y = X.to(device), y.to(device)
+
+            out = model(X)
+
+            correct += (out.argmax(1) == y).sum().item()
+
+            n += len(y)
+
+    return correct / n
+
+model = TinyCNN(10).to(device)
+
+criterion = nn.CrossEntropyLoss()
+
+optimizer = optim.Adam(model.parameters(), lr=1e-3)
+
+for epoch in range(3):
+
+    loss, acc = train_epoch(model, train_loader, criterion, optimizer, device)
+
+    test_acc = eval_model(model, test_loader, device)
+
+    print(f"Epoch {epoch+1}  Train loss: {loss:.4f}  Train acc: {acc:.4f}  Test acc: {test_acc:.4f}")
+
+print("Done.")
+
