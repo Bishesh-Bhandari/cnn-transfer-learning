@@ -246,3 +246,28 @@ x = np.array([1., 2., 3., 4., 5., 6., 7.])
 w = np.array([0.5, -0.5])
 
 print("1D conv output:", conv1d_numpy(x, w))
+
+###Now hands-on : train tiny cnn on MNIST data 
+# minst data are those data which consist of image of resoultion of 28*28  of the digits (0-9) 
+
+# MNIST: 28×28 grayscale digits (0–9). Normalize with dataset mean/std for stable training.
+
+transform = transforms.Compose([
+
+    transforms.ToTensor(),
+
+    transforms.Normalize((0.1307,), (0.3081,))  # MNIST mean and std
+
+])
+
+train_set = datasets.MNIST(root="./data", train=True, download=True, transform=transform)
+
+test_set = datasets.MNIST(root="./data", train=False, download=True, transform=transform)
+
+# num_workers=0: safe on Windows and Apple M (avoids multiprocessing issues)
+
+train_loader = DataLoader(train_set, batch_size=64, shuffle=True, num_workers=NUM_WORKERS)
+
+test_loader = DataLoader(test_set, batch_size=256, shuffle=False, num_workers=NUM_WORKERS)
+
+print("MNIST train:", len(train_set), "test:", len(test_set))
